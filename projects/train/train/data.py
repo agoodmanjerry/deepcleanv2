@@ -192,9 +192,9 @@ class DeepCleanDataset(pl.LightningDataModule):
         # to our loss function. We have to do the
         # bandpass filtering back in numpy because
         # I can't get torchaudio to work properly
-        self.y_scaler.fit(train_y)
-        train_y = self.y_scaler(train_y)
         train_y = self.bandpass(train_y.numpy())
+        self.y_scaler.fit(torch.Tensor(train_y))
+        train_y = self.y_scaler(torch.Tensor(train_y))
         self.train_y = torch.Tensor(train_y)
 
         # we don't need to do any preprocessing on the
@@ -202,6 +202,7 @@ class DeepCleanDataset(pl.LightningDataModule):
         # going to do the cleaning in the "true" space
         self.valid_y = valid_y
         self.__logger.info("Data loading complete")
+        return torch.Tensor(self.train_X), torch.Tensor(train_y)
 
     def train_dataloader(self):
         # iterate through our data as a single
