@@ -23,7 +23,7 @@ data:
   fname: "/home/kamalan/dc-demo/data/L-L1_lldata-1369291863-16384.hdf5"
   channels:
     [
-      "L1:CAL-CS_PROC_DARM_STRAIN_DBL_DQ",
+      "L1:GDS-CALIB_STRAIN",
       "L1:PEM-CS_MAINSMON_EBAY_1_DQ",
       # "K1:CAL-CS_PROC_DARM_STRAIN_DBL_DQ",
       # "K1:PEM-MIC_BS_FIELD_BS_Z_OUT_DQ",
