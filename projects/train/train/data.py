@@ -208,9 +208,9 @@ class DeepCleanDataset(pl.LightningDataModule):
         # self.train_y = torch.Tensor(train_y)
         # y_mean, y_std = self.y_scaler.mean, self.y_scaler.std
 
+        train_y = self.bandpass(train_y.numpy())
         y_mean, y_std = 3.081302e-25, 3.719868e-22
         train_y = (torch.Tensor(train_y) - y_mean)/y_std
-        train_y = self.bandpass(train_y.numpy())
         self.train_y = torch.Tensor(train_y)
 
         # valid_y = (torch.Tensor(valid_y) - y_mean)/y_std
