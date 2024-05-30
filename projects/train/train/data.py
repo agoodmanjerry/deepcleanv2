@@ -167,9 +167,7 @@ class DeepCleanDataset(pl.LightningDataModule):
         split = [train_size, valid_size]
         self.__logger.info(
             "Training on first {} seconds, validating on "
-            "remaining {} seconds".format(
-                *[i / self.sample_rate for i in split]
-            )
+            "remaining {} seconds".format(*[i / self.sample_rate for i in split])
         )
         train_X, valid_X = torch.split(X, split, dim=1)
         train_y, valid_y = torch.split(y, split, dim=0)
@@ -192,9 +190,9 @@ class DeepCleanDataset(pl.LightningDataModule):
         # to our loss function. We have to do the
         # bandpass filtering back in numpy because
         # I can't get torchaudio to work properly
+        train_y = self.bandpass(train_y.numpy())
         self.y_scaler.fit(train_y)
         train_y = self.y_scaler(train_y)
-        train_y = self.bandpass(train_y.numpy())
         self.train_y = torch.Tensor(train_y)
 
         # we don't need to do any preprocessing on the
