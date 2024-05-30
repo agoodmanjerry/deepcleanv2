@@ -191,6 +191,7 @@ class DeepCleanDataset(pl.LightningDataModule):
         # bandpass filtering back in numpy because
         # I can't get torchaudio to work properly
         train_y = self.bandpass(train_y.numpy())
+        train_y = torch.Tensor(train_y)
         self.y_scaler.fit(train_y)
         train_y = self.y_scaler(train_y)
         self.train_y = torch.Tensor(train_y)
