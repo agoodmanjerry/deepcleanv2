@@ -150,7 +150,10 @@ class DeepCleanDataset(pl.LightningDataModule):
 
         if stage != "fit":
             self.test_X, self.test_y = self.load_timeseries("test")
-            self.test_X = self.X_scaler(self.test_X)
+            # self.test_X = self.X_scaler(self.test_X)
+
+            X_mean, X_std = -1.6613, 1795.4031
+            self.test_X = (self.test_X - X_mean)/X_std
             return
 
         # if we're training, split the data into
@@ -179,12 +182,19 @@ class DeepCleanDataset(pl.LightningDataModule):
         # them to 0 mean unit variance across
         # each channel. Ignore any channels that
         # are constant in the training data
-        self.X_scaler.fit(train_X)
-        std = self.X_scaler.std
-        std[std == 0] = 1
+        # self.X_scaler.fit(train_X)
+        # std = self.X_scaler.std
+        # std[std == 0] = 1
 
-        self.train_X = self.X_scaler(train_X)
-        self.valid_X = self.X_scaler(valid_X)
+        # self.train_X = self.X_scaler(train_X)
+        # self.valid_X = self.X_scaler(valid_X)
+        # X_mean, X_std = self.X_scaler.mean, self.X_scaler.std
+        
+        X_mean, X_std = -1.6613, 1795.4031
+        train_X = (train_X - X_mean)/X_std
+        valid_X = (valid_X - X_mean)/X_std
+        self.train_X = train_X
+        self.valid_X = valid_X
 
         # do the same to our output timeseries,
         # but bandpass filter the targets up front
@@ -192,17 +202,27 @@ class DeepCleanDataset(pl.LightningDataModule):
         # to our loss function. We have to do the
         # bandpass filtering back in numpy because
         # I can't get torchaudio to work properly
+        # train_y = self.bandpass(train_y.numpy())
+        # self.y_scaler.fit(torch.Tensor(train_y))
+        # train_y = self.y_scaler(torch.Tensor(train_y))
+        # self.train_y = torch.Tensor(train_y)
+        # y_mean, y_std = self.y_scaler.mean, self.y_scaler.std
+
+        y_mean, y_std = 3.081302e-25, 3.719868e-22
+        train_y = (torch.Tensor(train_y) - y_mean)/y_std
         train_y = self.bandpass(train_y.numpy())
-        self.y_scaler.fit(torch.Tensor(train_y))
-        train_y = self.y_scaler(torch.Tensor(train_y))
         self.train_y = torch.Tensor(train_y)
+
+        # valid_y = (torch.Tensor(valid_y) - y_mean)/y_std
+        # valid_y = self.bandpass(valid_y.numpy())
+        # self.valid_y = torch.Tensor(valid_y)
 
         # we don't need to do any preprocessing on the
         # validation target timeseries since we're
         # going to do the cleaning in the "true" space
         self.valid_y = valid_y
         self.__logger.info("Data loading complete")
-        return torch.Tensor(self.train_X), torch.Tensor(train_y)
+        # return torch.Tensor(self.train_X), X_mean, X_std, torch.Tensor(train_y), y_mean, y_std
 
     def train_dataloader(self):
         # iterate through our data as a single
