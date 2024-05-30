@@ -153,7 +153,7 @@ class DeepCleanDataset(pl.LightningDataModule):
             # self.test_X = self.X_scaler(self.test_X)
 
             X_mean, X_std = -1.6613, 1795.4031
-            self.test_X = (self.test_X - X_mean)/X_std
+            self.test_X = (self.test_X - X_mean) / X_std
             return
 
         # if we're training, split the data into
@@ -170,9 +170,7 @@ class DeepCleanDataset(pl.LightningDataModule):
         split = [train_size, valid_size]
         self.__logger.info(
             "Training on first {} seconds, validating on "
-            "remaining {} seconds".format(
-                *[i / self.sample_rate for i in split]
-            )
+            "remaining {} seconds".format(*[i / self.sample_rate for i in split])
         )
         train_X, valid_X = torch.split(X, split, dim=1)
         train_y, valid_y = torch.split(y, split, dim=0)
@@ -189,10 +187,10 @@ class DeepCleanDataset(pl.LightningDataModule):
         # self.train_X = self.X_scaler(train_X)
         # self.valid_X = self.X_scaler(valid_X)
         # X_mean, X_std = self.X_scaler.mean, self.X_scaler.std
-        
+
         X_mean, X_std = -1.6613, 1795.4031
-        train_X = (train_X - X_mean)/X_std
-        valid_X = (valid_X - X_mean)/X_std
+        train_X = (train_X - X_mean) / X_std
+        valid_X = (valid_X - X_mean) / X_std
         self.train_X = train_X
         self.valid_X = valid_X
 
@@ -209,7 +207,7 @@ class DeepCleanDataset(pl.LightningDataModule):
         # y_mean, y_std = self.y_scaler.mean, self.y_scaler.std
 
         y_mean, y_std = 3.081302e-25, 3.719868e-22
-        train_y = (torch.Tensor(train_y) - y_mean)/y_std
+        train_y = (torch.Tensor(train_y) - y_mean) / y_std
         train_y = self.bandpass(train_y.numpy())
         self.train_y = torch.Tensor(train_y)
 
