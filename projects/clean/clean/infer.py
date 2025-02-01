@@ -81,6 +81,7 @@ class OnlineInference:
         self.start = sample_rate - filter_pad
         self.stop = 2 * sample_rate + filter_pad
         self.noise = self.y_pred[self.start:self.stop]
+        self.noise = self.y_pred
 
         return self.noise
 
@@ -91,7 +92,7 @@ class OnlineInference:
         self.noise = self.model.y_scaler(self.noise.double().cpu(), reverse=True)
         self.noise = self.model.bandpass(self.noise.detach().numpy())
         self.noise = torch.tensor(self.noise, device=self.device).flatten()
-        self.noise = self.noise[self.filter_pad:-self.filter_pad].double()
+        self.noise = self.noise[self.start + self.filter_pad:self.stop - self.filter_pad].double()
         
         self.raw   = self.dataset.y_inference.X.to(self.device).flatten()
         self.raw   = self.raw[self.start + self.filter_pad:self.stop - self.filter_pad]

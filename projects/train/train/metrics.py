@@ -131,7 +131,6 @@ class OnlinePsdRatio(Metric):
         # postprocess, doing the bandpass filtering back
         # in numpy because torchaudio won't work
         noise = torch.stack(noise).double()
-        noise_before_process = noise
         noise = self.y_scaler(noise, reverse=True)
         noise = self.bandpass(noise.cpu().detach().numpy())
         noise = torch.tensor(noise, device=device)
