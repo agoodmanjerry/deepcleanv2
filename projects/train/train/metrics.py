@@ -47,7 +47,6 @@ class PsdRatio(torch.nn.Module):
         loss = ratio.mean(dim=-1)
         return loss
 
-
 class OnlinePsdRatio(Metric):
     def __init__(
         self,
