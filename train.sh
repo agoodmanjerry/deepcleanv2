@@ -14,6 +14,6 @@ export DEEPCLEAN_IFO=H1
 poetry run law run deepclean.tasks.Train \
     --image train.sif \
     --gpus $GPU_INDEX \
-    --data-fname $DATA_DIR/O3_AC_train_H1-1250916844-12288.hdf5 \
+    --data-fname $DATA_DIR/H-H1_O4_REVIEW_TRAIN-1250916945-12288.hdf5 \
     --train-config ${HOME}/deepcleanv2/projects/train/config.yaml \
-    --output-dir ${RESULTS_DIR}/train-O3-H1-kernel_1_1_st_0p5_epad_0p2_fpad_0p8_lr_0p2_oclr \
+    --output-dir ${RESULTS_DIR}/train-O4-review-H1 \

@@ -8,11 +8,8 @@ from typing import Iterable, Literal, Optional, Tuple, Union
 
 import numpy as np
 from gwpy.timeseries import TimeSeries
-import math
-from scipy.signal.windows import hann
-from scipy.signal import firwin
-from scipy.signal import filtfilt
 from scipy.signal import resample
+from scipy.signal.windows import hann
 
 #from deepclean.logging import logger
 #from deepclean.utils.channels import get_channels as sort_channels
@@ -370,6 +367,8 @@ class Buffer:
             x = None
         else:
             x = read_channel(fname, channel)
+            # Using gwpy to resample
+            x = x.resample(self.target_sample_rate)
 
         # if this is the first time this buffer
         # is being updated, infer the original
@@ -428,34 +427,20 @@ class Buffer:
             # print(f"Difference between the resampled and before resampled x in buffer: {diff}.")
             #x = resample(self.x, length, window="boxcar")
 
-            # Using gwpy's way to resample
-            n = 60
-            factor = (self.sample_rate/self.target_sample_rate)
-            if math.isclose(factor, 1., rel_tol=1e-09, abs_tol=0.):
-                x = self.x
-            # if integer down-sampling, use decimate 
-            if factor.is_integer():
-                x = self.x
-                filt = firwin(n+1, 1./factor, window="hamming")
-                b, a = filt, [1.]
-                x = filtfilt(b, a, x)[::int(factor)]
-            # otherwise use Fourier filtering
-            else:
-                x = self.x
-                nsamp = int(dur*self.target_sample_rate)
-                x = resample(x, nsamp, window="hamming")
-
-            # to return, then cut off the earliest second
-            # that we no longer need
-            self.x = self.x[int(self.sample_rate) :]
-            return x
             # the below line was written for a sanity test
             #x = 1.0*(self.x) 
 
             # slice out the middle second of our buffer
+            # to return, then cut off the earliest second
+            # that we no longer need
             # size = int(self.target_sample_rate)
-            # x = x[-2 * size : -size]
+            #x = x[-2 * size : -size]
+            # self.x = self.x[int(self.sample_rate) :]
 
+            # Using gwpy to resample
+            # x = x.resample(self.target_sample_rate)
+
+            return x
 
         # otherwise indicate that we don't have
         # enough data to return
