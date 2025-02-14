@@ -5,15 +5,37 @@ from pathlib import Path
 import law
 import luigi
 from law.contrib import singularity
+from law.contrib.singularity.config import config_defaults
 
 from deepclean.config import deepclean as Config
 from deepclean.utils import stream_command
 
 root = Path(__file__).resolve().parent.parent
 
+DATAFIND_ENV_VARS = [
+    "KRB5_KTNAME",
+    "X509_USER_PROXY",
+    "GWDATAFIND_SERVER",
+    "NDSSERVER",
+    "LIGO_USERNAME",
+    "DEFAULT_SEGMENT_SERVER",
+    "AWS_ENDPOINT_URL",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_ACCESS_KEY_ID",
+]
 
 class DeepCleanSandbox(singularity.SingularitySandbox):
     sandbox_type = "deepclean"
+
+    @classmethod
+    def config(cls):
+        config = {}
+        default = config_defaults(None).pop("singularity_sandbox")
+        default["law_executable"] = "/opt/env/bin/law"
+        default["forward_law"] = False
+        postfix = cls.sandbox_type
+        config[f"singularity_sandbox_{postfix}"] = default
+        return config
 
     @property
     def data_directories(self):
@@ -31,6 +53,15 @@ class DeepCleanSandbox(singularity.SingularitySandbox):
 
         return volumes
 
+    def _get_env(self):
+        env = super()._get_env()
+        for envvar in DATAFIND_ENV_VARS:
+            value = os.getenv(envvar)
+            if value is not None:
+                env[envvar] = value
+        return env
+
+law.config.update(DeepCleanSandbox.config())
 
 class DeepCleanTask(law.SandboxTask):
     image = luigi.Parameter()
