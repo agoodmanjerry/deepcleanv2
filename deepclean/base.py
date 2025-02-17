@@ -51,6 +51,10 @@ class DeepCleanSandbox(singularity.SingularitySandbox):
             if os.path.exists(dir):
                 volumes[dir] = dir
 
+        local = f"/local/{os.getenv('USER')}"
+        if os.path.exists(local):
+            volumes[local] = local
+
         return volumes
 
     def _get_env(self):
@@ -59,6 +63,10 @@ class DeepCleanSandbox(singularity.SingularitySandbox):
             value = os.getenv(envvar)
             if value is not None:
                 env[envvar] = value
+
+        # forward law config file to the container
+        # so tasks can read parameters from it
+        env["LAW_CONFIG_FILE"] = os.getenv("LAW_CONFIG_FILE", "")
         return env
 
 law.config.update(DeepCleanSandbox.config())
@@ -126,3 +134,6 @@ class DeepCleanTask(law.SandboxTask):
 
     def run(self):
         stream_command(self.command)
+
+    def singularity_forward_law(self) -> bool:
+        return False
