@@ -156,14 +156,9 @@ class OnlineInference:
 
     def write(self):
         
-        #cleaned = cleaned.cpu().numpy()
-
-
         # Create a TimeSeriesDict and add the TimeSeries objects to it
         ts_dict = TimeSeriesDict()
         ts_dict[self.dataset.strain_channel+"_DC"] = self.ts
-        # ts_dict[self.dataset.strain_channel] = self.ts_raw
-        # ts_dict[self.dataset.strain_channel+"_pred"] = ts_noise
 
         # Write the TimeSeriesDict to a file
         ts_dict.write(self.outfile_path)
