@@ -11,6 +11,7 @@ mkdir -p /cvmfs /hdfs /gpfs /ceph /hadoop
 # install git for pip installation
 apt-get update
 apt-get install -y --no-install-recommends git
+apt-get clean
 
 # activate micromamba and create environment from lockfile
 /bin/bash /root/.bashrc
@@ -22,11 +23,21 @@ micromamba create -p /opt/env -f /opt/deepclean/projects/data/conda-lock.yml
 micromamba run -p /opt/env python -m \
     pip install --no-deps --no-build-isolation \
         -e /opt/deepclean/projects/utils \
-        -e /opt/deepclean/projects/data
+        -e /opt/deepclean/projects/data \
+	-e /opt/deepclean
 
 # initialize our shell so that we can execute
 # commands in our environment at run time
 micromamba shell init --shell=bash --root-prefix=~/micromamba
+
+# set path, and add it to /etc/profile
+# so that it will be set if login shell
+# is invoked
+export PATH=/env/bin:$PATH
+echo export PATH=$PATH >> /etc/profile
+
+%environment
+    export PATH=/env/bin:$PATH
 
 %runscript
 #!/bin/bash
