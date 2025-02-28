@@ -34,3 +34,30 @@
     - We can choose the GPU to train the model by setting "GPU_INDEX".
     - Make sure "--data-fname", "train-config", "--output-dir" are set correctly.
 6. `. train.sh`
+
+## Data Replay
+1. `mkdir -p dc-review/ll_data/kafka/H1`
+2. `mkdir -p dc-review/ll_data/lldetchar/H1`
+3. `mkdir -p dc-review/ll_data/llhoft_buffer/H1`
+4. `mkdir -p dc-review/ll_data/lldetchar_buffer/H1`
+5. `mkdir -p dc-review/ll_data/unresampled_data/H1_HOFT`
+6. `mkdir -p dc-review/ll_data/unresampled_data/H1_INMON`
+7. `cd dc-review/deepcleanv2/data_replay/get_lldata`
+8. Setting get_data.sh to get llhoft data by setting "KIND=llhoft".
+9. `bash get_data.sh`
+10. Setting get_data.sh to get llhoft data by setting "KIND=lldetchar".
+11. `bash get_data.sh`
+12. `cd dc-review/deepcleanv2/data_replay/make_lldata`
+13. Setting make_lldata.sh to make 1-second long gwf files in the llhoft_buffer folder by setting "KIND=llhoft".
+14. `bash make_lldata.sh`
+15. Setting make_lldata.sh to make 1-second long gwf files in the lldetchar_buffer folder by setting "KIND=lldetchar".
+16. `bash make_lldata.sh`
+17. `cd dc-review/deepcleanv2/data_replay/replay`
+18. Setting start_replay.sh so the 1-second log gwf files in the buffer folders can be copied to the kafka folder and lldetchar folder.
+19. `bash start_replay.sh`
+20. To stop the replay, just run `bash stop_replay.sh`
+
+## Cleaning
+1. Setting deepcleanv2/projects/clean/config_clean.yaml
+2. `cd projects/clean`
+3. `bash run-clean.sh`
