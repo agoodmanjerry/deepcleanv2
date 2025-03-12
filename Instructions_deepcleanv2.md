@@ -20,8 +20,11 @@
 3. `. export_vars.sh`
 4. Setting deepcleanv2/luigi.cfg
     - Setting subtraction problem, the problems can be found in /deepclean/couplings.
-5. Setting deepcleanv2/fetch.sh
-6. `. fetch.sh`
+5. `cd projects/data`
+6. `apptainer build $DEEPCLEAN_CONTAINER_ROOT/data.sif apptainer.def`
+7. `cd -`
+8. Setting deepcleanv2/fetch.sh
+9. `. fetch.sh`
 
 ## Training
 1. `cd projects/train`
@@ -30,7 +33,7 @@
     - To reduce the time of the test, "data:train_duration" and "data:test_duration" may be reduced.
 4. `cd -`
 5. Setting deepcleanv2/train.sh
-    - Comment out the seeting of "DEEPCLEAN_CONTAINER_ROOT", "DATA_DIR", "RESULTS_DIR" if these environment variables are set in /export_vars.sh, otherwise we need to set them here.
+    - Comment out the setting of "DEEPCLEAN_CONTAINER_ROOT", "DATA_DIR", "RESULTS_DIR" if these environment variables are set in /export_vars.sh, otherwise we need to set them here.
     - We can choose the GPU to train the model by setting "GPU_INDEX".
     - Make sure "--data-fname", "train-config", "--output-dir" are set correctly.
 6. `. train.sh`

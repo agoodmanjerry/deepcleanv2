@@ -3,12 +3,12 @@
 IFO=H1
 HOFT_TAG=HOFT
 DETCHAR_TAG=INMON
-HOFT_SOURCE=/home/chiajui.chou/ll_data_O4_review/unresampled_data/${IFO}_${HOFT_TAG}
-DETCHAR_SOURCE=/home/chiajui.chou/ll_data_O4_review/unresampled_data/${IFO}_${DETCHAR_TAG}
-HOFT_DESTINATION=/home/chiajui.chou/ll_data_O4_review/llhoft_buffer/${IFO}
-DETCHAR_DESTINATION=/home/chiajui.chou/ll_data_O4_review/lldetchar_buffer/${IFO}
+HOFT_SOURCE=/home/chiajui.chou/ll_data/unresampled_data/${IFO}_${HOFT_TAG}
+DETCHAR_SOURCE=/home/chiajui.chou/ll_data/unresampled_data/${IFO}_${DETCHAR_TAG}
+HOFT_DESTINATION=/home/chiajui.chou/ll_data/llhoft_buffer/${IFO}
+DETCHAR_DESTINATION=/home/chiajui.chou/ll_data/lldetchar_buffer/${IFO}
 START=1250916945
-DURATION=10
+DURATION=12288
 KIND=lldetchar
 
 python make_lldata.py \
