@@ -1,12 +1,12 @@
 #!/bin/bash
 #set -x
 
-HOFT_SOURCE=/home/chiajui.chou/ll_data_O4_review/llhoft_buffer
-HOFT_DESTINATION=/home/chiajui.chou/ll_data_O4_review/kafka
-WITNESS_SOURCE=/home/chiajui.chou/ll_data_O4_review/lldetchar_buffer
-WITNESS_DESTINATION=/home/chiajui.chou/ll_data_O4_review/lldetchar
-START=1250916844
-DURATION=10
+HOFT_SOURCE=/home/chiajui.chou/ll_data/llhoft_buffer
+HOFT_DESTINATION=/home/chiajui.chou/ll_data/kafka
+WITNESS_SOURCE=/home/chiajui.chou/ll_data/lldetchar_buffer
+WITNESS_DESTINATION=/home/chiajui.chou/ll_data/lldetchar
+START=1250916945
+DURATION=12288
 KEEP=12288
 
 function start_replay {

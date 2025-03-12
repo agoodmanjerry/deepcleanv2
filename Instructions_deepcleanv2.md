@@ -63,4 +63,5 @@
 ## Cleaning
 1. Setting deepcleanv2/projects/clean/config_clean.yaml
 2. `cd projects/clean`
+2. `poetry install`
 3. `bash run-clean.sh`
