@@ -1,9 +1,2 @@
-rm: cannot remove '/home/chiajui.chou/ll_data/kafka/H1/*': No such file or directory
-rm: cannot remove '/home/chiajui.chou/ll_data/lldetchar/H1/*': No such file or directory
 H1 Replay starts: 1250916945 s.
-Traceback (most recent call last):
-  File "/home/chiajui.chou/deepcleanv2/data_replay/replay/replay.py", line 68, in <module>
-    main()
-  File "/home/chiajui.chou/deepcleanv2/data_replay/replay/replay.py", line 65, in main
-    time.sleep(wait)
-ValueError: sleep length must be non-negative
+H1 Replay ends: 1250929233 s.
