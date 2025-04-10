@@ -17,9 +17,10 @@
     - DEEPCLEAN_CONTAINER_ROOT=\${HOME}/dc-review/images/deepclean
     - DATA_DIR=\${HOME}/dc-review/deepclean/data
     - RESULTS_DIR=${HOME}/dc-review/deepclean/results
+    - Setting subtraction problem, the problems can be found in /deepclean/couplings.
 3. `. export_vars.sh`
 4. Setting deepcleanv2/luigi.cfg
-    - Setting subtraction problem, the problems can be found in /deepclean/couplings.
+    - Setting container_root.
 5. `cd projects/data`
 6. `apptainer build $DEEPCLEAN_CONTAINER_ROOT/data.sif apptainer.def`
 7. `cd -`

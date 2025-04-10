@@ -12,30 +12,30 @@ from deepclean.utils import stream_command
 
 root = Path(__file__).resolve().parent.parent
 
-DATAFIND_ENV_VARS = [
-    "KRB5_KTNAME",
-    "X509_USER_PROXY",
-    "GWDATAFIND_SERVER",
-    "NDSSERVER",
-    "LIGO_USERNAME",
-    "DEFAULT_SEGMENT_SERVER",
-    "AWS_ENDPOINT_URL",
-    "AWS_SECRET_ACCESS_KEY",
-    "AWS_ACCESS_KEY_ID",
-]
+# DATAFIND_ENV_VARS = [
+#     "KRB5_KTNAME",
+#     "X509_USER_PROXY",
+#     "GWDATAFIND_SERVER",
+#     "NDSSERVER",
+#     "LIGO_USERNAME",
+#     "DEFAULT_SEGMENT_SERVER",
+#     "AWS_ENDPOINT_URL",
+#     "AWS_SECRET_ACCESS_KEY",
+#     "AWS_ACCESS_KEY_ID",
+# ]
 
 class DeepCleanSandbox(singularity.SingularitySandbox):
     sandbox_type = "deepclean"
 
-    @classmethod
-    def config(cls):
-        config = {}
-        default = config_defaults(None).pop("singularity_sandbox")
-        default["law_executable"] = "/opt/env/bin/law"
-        default["forward_law"] = False
-        postfix = cls.sandbox_type
-        config[f"singularity_sandbox_{postfix}"] = default
-        return config
+    # @classmethod
+    # def config(cls):
+    #     config = {}
+    #     default = config_defaults(None).pop("singularity_sandbox")
+    #     default["law_executable"] = "/opt/env/bin/law"
+    #     default["forward_law"] = False
+    #     postfix = cls.sandbox_type
+    #     config[f"singularity_sandbox_{postfix}"] = default
+    #     return config
 
     @property
     def data_directories(self):
@@ -57,19 +57,19 @@ class DeepCleanSandbox(singularity.SingularitySandbox):
 
         return volumes
 
-    def _get_env(self):
-        env = super()._get_env()
-        for envvar in DATAFIND_ENV_VARS:
-            value = os.getenv(envvar)
-            if value is not None:
-                env[envvar] = value
+#     def _get_env(self):
+#         env = super()._get_env()
+#         for envvar in DATAFIND_ENV_VARS:
+#             value = os.getenv(envvar)
+#             if value is not None:
+#                 env[envvar] = value
 
-        # forward law config file to the container
-        # so tasks can read parameters from it
-        env["LAW_CONFIG_FILE"] = os.getenv("LAW_CONFIG_FILE", "")
-        return env
+#         # forward law config file to the container
+#         # so tasks can read parameters from it
+#         env["LAW_CONFIG_FILE"] = os.getenv("LAW_CONFIG_FILE", "")
+#         return env
 
-law.config.update(DeepCleanSandbox.config())
+# law.config.update(DeepCleanSandbox.config())
 
 class DeepCleanTask(law.SandboxTask):
     image = luigi.Parameter()
@@ -135,5 +135,5 @@ class DeepCleanTask(law.SandboxTask):
     def run(self):
         stream_command(self.command)
 
-    def singularity_forward_law(self) -> bool:
-        return False
+    # def singularity_forward_law(self) -> bool:
+    #     return False
