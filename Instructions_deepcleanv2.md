@@ -17,11 +17,15 @@
     - DEEPCLEAN_CONTAINER_ROOT=\${HOME}/dc-review/images/deepclean
     - DATA_DIR=\${HOME}/dc-review/deepclean/data
     - RESULTS_DIR=${HOME}/dc-review/deepclean/results
+    - Setting subtraction problem, the problems can be found in /deepclean/couplings.
 3. `. export_vars.sh`
 4. Setting deepcleanv2/luigi.cfg
-    - Setting subtraction problem, the problems can be found in /deepclean/couplings.
-5. Setting deepcleanv2/fetch.sh
-6. `. fetch.sh`
+    - Setting container_root.
+5. `cd projects/data`
+6. `apptainer build $DEEPCLEAN_CONTAINER_ROOT/data.sif apptainer.def`
+7. `cd -`
+8. Setting deepcleanv2/fetch.sh
+9. `. fetch.sh`
 
 ## Training
 1. `cd projects/train`
@@ -30,7 +34,7 @@
     - To reduce the time of the test, "data:train_duration" and "data:test_duration" may be reduced.
 4. `cd -`
 5. Setting deepcleanv2/train.sh
-    - Comment out the seeting of "DEEPCLEAN_CONTAINER_ROOT", "DATA_DIR", "RESULTS_DIR" if these environment variables are set in /export_vars.sh, otherwise we need to set them here.
+    - Comment out the setting of "DEEPCLEAN_CONTAINER_ROOT", "DATA_DIR", "RESULTS_DIR" if these environment variables are set in /export_vars.sh, otherwise we need to set them here.
     - We can choose the GPU to train the model by setting "GPU_INDEX".
     - Make sure "--data-fname", "train-config", "--output-dir" are set correctly.
 6. `. train.sh`
@@ -60,4 +64,5 @@
 ## Cleaning
 1. Setting deepcleanv2/projects/clean/config_clean.yaml
 2. `cd projects/clean`
+2. `poetry install`
 3. `bash run-clean.sh`

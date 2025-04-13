@@ -1,11 +1,11 @@
 #!/bin/bash
 
-IFO=L1
-CHANNELS=/home/chiajui.chou/ll_data_O4_review/get_lldata/chanslist_O3.txt
+IFO=H1
+CHANNELS=/home/chiajui.chou/deepcleanv2/data_replay/get_lldata/chanslist_O3.txt
 START=1250916945
-DURATION=12
+DURATION=12288
 LENGTH=12288
-DESTINATION=/home/chiajui.chou/ll_data_O4_review/unresampled_data
+DESTINATION=/home/chiajui.chou/ll_data/unresampled_data
 HOFT_TAG=HOFT
 DETCHAR_TAG=INMON
 KIND=lldetchar

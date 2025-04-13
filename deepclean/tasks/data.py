@@ -4,6 +4,7 @@ import law
 import luigi
 
 from deepclean.base import DeepCleanTask
+from deepclean.tasks.condor.workflows import StaticMemoryWorkflow
 
 
 class DataTask(DeepCleanTask):
@@ -43,7 +44,8 @@ class Query(DataTask):
     end = luigi.FloatParameter()
     output_file = luigi.Parameter()
     min_duration = luigi.FloatParameter(default=0)
-    flags = luigi.ListParameter(default=["DCS-ANALYSIS_READY_C01:1"])
+    # flags = luigi.ListParameter(default=["DCS-ANALYSIS_READY_C01:1"])
+    flags = luigi.ListParameter(default=["DMT-ANALYSIS_READY:1"])
 
     def output(self):
         return law.LocalFileTarget(self.output_file)
@@ -73,7 +75,8 @@ class Fetch(DataTask, law.LocalWorkflow):
     min_duration = luigi.FloatParameter(default=0)
     max_duration = luigi.FloatParameter(default=-1)
     prefix = luigi.Parameter(default="deepclean")
-    flags = luigi.ListParameter(default=["DCS-ANALYSIS_READY_C01:1"])
+    # flags = luigi.ListParameter(default=["DCS-ANALYSIS_READY_C01:1"])
+    flags = luigi.ListParameter(default=["DMT-ANALYSIS_READY:1"])
     segments_file = luigi.Parameter(default="")
 
     def __init__(self, *args, **kwargs):

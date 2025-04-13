@@ -32,7 +32,7 @@ def make_ll_gwf(
         end=end,
     )
     
-    print(f"Making 1-second gwf files of the following channels:/n")
+    print(f"Making 1-second gwf files of the following channels:\n")
     print(channels)
     duration = end - start
     i = 0
