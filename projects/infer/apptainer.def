@@ -1,0 +1,21 @@
+Bootstrap: docker
+From: python:3.10.12-slim-bullseye
+Stage: build
+
+%files
+../.. /opt/deepclean
+
+%post
+apt-get update
+apt-get install -y --no-install-recommends git
+apt-get install -y build-essential
+apt-get clean
+
+python -m pip install --upgrade pip
+python -m pip install poetry
+poetry config virtualenvs.create false
+cd /opt/deepclean/projects/train
+poetry install
+cd /opt/deepclean/projects/offline
+poetry install
+
