@@ -239,7 +239,7 @@ class DeepCleanDataset(pl.LightningDataModule):
         stride = int(self.sample_rate / self.hparams.inference_sampling_rate)
         witnesses = InMemoryDataset(
             X,
-            kernel_size=int(1 * self.sample_rate),
+            kernel_size=self.kernel_size,
             stride=stride,
             batch_size=4 * self.hparams.batch_size,
             coincident=True,
@@ -249,8 +249,8 @@ class DeepCleanDataset(pl.LightningDataModule):
 
         strain = InMemoryDataset(
             y[None],
-            kernel_size=int(1 * self.sample_rate),
-            stride=int(1 * self.sample_rate),
+            kernel_size=self.kernel_size,
+            stride=stride,
             batch_size=4 * self.hparams.batch_size,
             coincident=True,
             shuffle=False,
@@ -262,4 +262,7 @@ class DeepCleanDataset(pl.LightningDataModule):
         return self._async_loader(self.valid_X, self.valid_y)
 
     def test_dataloader(self):
+        return self._async_loader(self.test_X, self.test_y)
+
+    def predict_dataloader(self):
         return self._async_loader(self.test_X, self.test_y)

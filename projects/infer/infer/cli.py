@@ -37,9 +37,13 @@ def main(args=None):
         module.load_state_dict(values)
 
     # run predictions
+    import pdb
+    pdb.set_trace()
     cli.trainer.predict(cli.model, datamodule=cli.datamodule)
+    pdb.set_trace()
     # combine predictions to one strain
     noise, raw = cli.model.metric.compute(reduce=False)
+    pdb.set_trace()
 
     # TODO: save noise and raw output in new frame file
 

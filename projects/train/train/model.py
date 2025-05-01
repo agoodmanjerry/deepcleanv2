@@ -63,6 +63,9 @@ class DeepClean(pl.LightningModule):
     def test_step(self, batch, _) -> None:
         return self._shared_eval_step(*batch)
 
+    def predict_step(self, batch, _) -> None:
+        return self._shared_eval_step(*batch)
+
     def configure_callbacks(self) -> list[pl.Callback]:
         # first callback actually computes all of our
         # validation metrics and any associated plots
