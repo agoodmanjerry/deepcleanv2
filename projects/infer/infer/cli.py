@@ -9,7 +9,32 @@ from train.model import DeepClean
 from utils.logging import configure_logging
 from train.cli import AframeCLI
 from jsonargparse import ActionConfigFile, ArgumentParser
+import glob
+import re
 
+def get_best_checkpoint_path(checkpoint_dir):
+    checkpoint_files = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
+    if not checkpoint_files:
+        return None
+
+    best_checkpoint_file = None
+    best_metric_value = float('inf') # Initialize with a large value for loss, or -inf for accuracy
+
+    for checkpoint_file in checkpoint_files:
+        match = re.search(r"epoch=(\d+)-val_loss=([\d\.]+)", checkpoint_file) # Adjust regex based on your filename format
+        if match:
+            epoch = int(match.group(1))
+            metric_value = float(match.group(2))
+
+            if metric_value < best_metric_value: # Use > for accuracy
+                best_metric_value = metric_value
+                best_checkpoint_file = checkpoint_file
+        else:
+             #print(f"Warning: Could not extract metric from checkpoint file: {checkpoint_file}")
+             if best_checkpoint_file is None:
+                best_checkpoint_file = checkpoint_file # If no metric is found, take the first file as a fallback
+
+    return best_checkpoint_file
 
 def main(args=None):
 
@@ -23,29 +48,28 @@ def main(args=None):
         args=args,
     )
 
+
     # TODO: we need to update the dataset such that it can be loaded in completely, see here: https://github.com/ML4GW/ml4gw/blob/main/ml4gw/dataloading/hdf5_dataset.py 
 
     # recover model from checkpoint
-    # TODO: read model checkpoint from config or similar
-    weights = torch.load("/home/christina.reissel/deepclean/results/test-infer/lightning_logs/version_0/checkpoints/68-2139.ckpt")
+    path = cli.trainer.logger.save_dir
+    best_ckpt = get_best_checkpoint_path(path+"checkpoints")
+    weights = torch.load(best_ckpt)
     cli.model.load_state_dict(weights["state_dict"])
     # initilize scaler
     for i in ["X", "y"]:
         name = f"{i}_scaler"
         module = getattr(cli.datamodule, name)
-        values = torch.load(os.path.join("/home/christina.reissel/deepclean/results/test-infer/lightning_logs/version_0/", f"{name}.pt"))
+        values = torch.load(os.path.join(path, f"{name}.pt"))
         module.load_state_dict(values)
 
     # run predictions
-    import pdb
-    pdb.set_trace()
     cli.trainer.predict(cli.model, datamodule=cli.datamodule)
-    pdb.set_trace()
     # combine predictions to one strain
     noise, raw = cli.model.metric.compute(reduce=False)
-    pdb.set_trace()
 
     # TODO: save noise and raw output in new frame file
+
 
 if __name__ == "__main__":
     main()
