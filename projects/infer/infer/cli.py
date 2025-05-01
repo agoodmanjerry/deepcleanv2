@@ -48,9 +48,6 @@ def main(args=None):
         args=args,
     )
 
-
-    # TODO: we need to update the dataset such that it can be loaded in completely, see here: https://github.com/ML4GW/ml4gw/blob/main/ml4gw/dataloading/hdf5_dataset.py 
-
     # recover model from checkpoint
     path = cli.trainer.logger.save_dir
     best_ckpt = get_best_checkpoint_path(path+"checkpoints")
