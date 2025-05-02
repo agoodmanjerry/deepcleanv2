@@ -12,6 +12,7 @@ from utils.logging import configure_logging
 class AframeCLI(LightningCLI):
     def add_arguments_to_parser(self, parser):
         parser.add_argument("--verbose", type=bool, default=False)
+        parser.add_argument("--output-dir", type=str, default=None)
 
         parser.add_optimizer_args(torch.optim.Adam)
         parser.add_lr_scheduler_args(torch.optim.lr_scheduler.OneCycleLR)

@@ -11,6 +11,7 @@ from train.cli import AframeCLI
 from jsonargparse import ActionConfigFile, ArgumentParser
 import glob
 import re
+from gwpy.timeseries import TimeSeriesDict, TimeSeries
 
 def get_best_checkpoint_path(checkpoint_dir):
     checkpoint_files = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
@@ -35,6 +36,13 @@ def get_best_checkpoint_path(checkpoint_dir):
                 best_checkpoint_file = checkpoint_file # If no metric is found, take the first file as a fallback
 
     return best_checkpoint_file
+
+def get_file_info(filename):
+    f = filename.split('/')[-1]
+    prefix = f.split('-')[0]
+    start = f.split('-')[1]
+    duration = f.split('-')[2].replace('.hdf5', '')
+    return prefix, start, duration
 
 def main(args=None):
 
@@ -64,9 +72,24 @@ def main(args=None):
     cli.trainer.predict(cli.model, datamodule=cli.datamodule)
     # combine predictions to one strain
     noise, raw = cli.model.metric.compute(reduce=False)
+    clean = (raw - noise).detach().numpy()[0,:]
+    raw = raw.detach().numpy()[0,:]
 
     # TODO: save noise and raw output in new frame file
+    prefix, start, duration = get_file_info(cli.datamodule.hparams.fname)
+    strain = cli.datamodule.hparams.channels[0]
 
+    ts_dict = TimeSeriesDict()
+    ts_dict[strain] = TimeSeries(data=raw, t0=start, sample_rate=cli.model.metric.sample_rate,
+                channel=strain, unit='seconds')
+    ts_dict[strain + "_DC"] = TimeSeries(data=clean, t0=start, sample_rate=cli.model.metric.sample_rate,
+                channel=strain+"_DC", unit='seconds')
+
+    fname = "{}-{}-{}.gwf".format(
+            prefix, int(start), int(duration)
+        )
+    fname = os.path.join(cli.config["output_dir"], fname)
+    ts_dict.write(fname, format="gwf")
 
 if __name__ == "__main__":
     main()

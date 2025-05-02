@@ -31,20 +31,24 @@ class Clean(DeepCleanTask, law.LocalWorkflow, StaticMemoryWorkflow):
 
     @workflow_condition.output
     def output(self):
-        # TODO: needs proper naming to not overwrite files
-        fname = f"output_test.hdf5"
-        return law.LocalFileTarget(fname)
+        prefix, start, duration = self.get_file_info(self.branch_data)
+        fname = f"{prefix}-{start}-{duration}.gwf"
 
-    def get_file_info(self):
-        filename = self.branch_data
+        target = law.LocalDirectoryTarget(self.output_dir)
+        target = target.child(fname, type="f")
+        return target
+
+    def get_file_info(self, filename):
         f = filename.split('/')[-1]
-        duration = f.split('-')[-1].replace('.hdf5', '')
-        return float(duration)
+        prefix = f.split('-')[0]
+        start = f.split('-')[1]
+        duration = f.split('-')[2].replace('.hdf5', '')
+        return prefix, int(float(start)), int(float(duration))
 
     @property
     def command(self) -> list[str]:
 
-        duration = self.get_file_info()
+        prefix, start, duration = self.get_file_info(self.branch_data)
         train_duration = duration/2.0
         test_duration = duration/2.0
 
@@ -68,6 +72,8 @@ class Clean(DeepCleanTask, law.LocalWorkflow, StaticMemoryWorkflow):
             str(train_duration),
             "--data.test_duration",
             str(test_duration),
+            "--output-dir",
+            str(self.output_dir)
         ]
 
         return command
