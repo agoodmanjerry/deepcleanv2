@@ -22,16 +22,18 @@ data:
   # loading args
   # fname:
   # channels: []
-  train_duration: 4096
-  test_duration: 8192
+  train_duration: 1024
+  test_duration: 2048
   train_stride: 0.0625
   valid_frac: 0.33
   inference_sampling_rate: 2
   start_offset: 0
+  clean_kernel_length: 1
+  clean_stride: 1
 
   # preprocessing args
-  batch_size: 512
-  kernel_length: 1
+  batch_size: 32
+  kernel_length: 8
   filt_order: 8
   # freq_low: []
   # freq_high: []
