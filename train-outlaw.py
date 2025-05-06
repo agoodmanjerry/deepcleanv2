@@ -14,12 +14,13 @@ DATA_DIR = f"{HOME}/deepclean/data/CDC_test-120Hz"
 RESULTS_DIR = f"{HOME}/deepclean/results"
 DEEPCLEAN_IFO = "H1"
 DEEPCLEAN_PROBLEM = "120Hz"
-GPU_INDEX = 1
+GPU_INDEX = 0
 # Original deepclean.tasks.Train
 # luigi.cfg
 cfg = dict.fromkeys(['deepclean', 'core'])
 for key in cfg:
     cfg[key] = dict()
+
 cfg['deepclean']['ifo'] = DEEPCLEAN_IFO
 cfg['deepclean']['problem'] = DEEPCLEAN_PROBLEM
 cfg['deepclean']['strain_channel'] = "GDS-CALIB_STRAIN"
