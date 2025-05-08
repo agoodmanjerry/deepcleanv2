@@ -44,7 +44,7 @@ class Query(DataTask):
     end = luigi.FloatParameter()
     output_file = luigi.Parameter()
     min_duration = luigi.FloatParameter(default=0)
-    # flags = luigi.ListParameter(default=["DCS-ANALYSIS_READY_C01:1"])
+    #flags = luigi.ListParameter(default=["DCS-ANALYSIS_READY_C01:1"])
     flags = luigi.ListParameter(default=["DMT-ANALYSIS_READY:1"])
 
     def output(self):
@@ -67,7 +67,7 @@ class Query(DataTask):
         return self.cli + args
 
 
-class Fetch(DataTask, law.LocalWorkflow):
+class Fetch(DataTask, law.LocalWorkflow, StaticMemoryWorkflow):
     start = luigi.FloatParameter()
     end = luigi.FloatParameter()
     sample_rate = luigi.FloatParameter()
@@ -75,7 +75,7 @@ class Fetch(DataTask, law.LocalWorkflow):
     min_duration = luigi.FloatParameter(default=0)
     max_duration = luigi.FloatParameter(default=-1)
     prefix = luigi.Parameter(default="deepclean")
-    # flags = luigi.ListParameter(default=["DCS-ANALYSIS_READY_C01:1"])
+    #flags = luigi.ListParameter(default=["DCS-ANALYSIS_READY_C01:1"])
     flags = luigi.ListParameter(default=["DMT-ANALYSIS_READY:1"])
     segments_file = luigi.Parameter(default="")
 

@@ -15,15 +15,15 @@ apt-get clean
 
 # activate micromamba and create environment from lockfile
 /bin/bash /root/.bashrc
-micromamba create -p /opt/env -f /opt/deepclean/projects/data/conda-lock.yml
+micromamba create -p /opt/env -f /opt/deepclean/projects/infer/conda-lock.yml
 
 # pip install our remaining packages, avoiding
 # installing dependencies since we don't want
 # to touch the libraries resolved by conda
 micromamba run -p /opt/env python -m \
-    pip install --no-deps --no-build-isolation \
-        -e /opt/deepclean/projects/utils \
-        -e /opt/deepclean/projects/data \
+    pip install --no-build-isolation \
+        -e /opt/deepclean/projects/infer \
+        -e /opt/deepclean/projects/train \
 	-e /opt/deepclean
 
 # initialize our shell so that we can execute

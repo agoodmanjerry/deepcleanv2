@@ -9,6 +9,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12" 
 gwpy = "^3.0.8"
+law = ">=0.1.19"
 
 [build-system]
 requires = ["poetry-core"]

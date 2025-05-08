@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "infer"
+description = "Offline Inference DeepClean using Lightning"
+version = "0.0.1"
+authors = ["Christina Reissel"]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+
+# torch libs
+torchmetrics = "^1"
+torchaudio = {version = "^2", source = "torch"}
+
+# lightning dependencies
+lightning = "^2.0"
+wandb = "^0.15"
+jsonargparse = {version = "^4.17", extras = ["signatures"]}
+
+# local dependencies
+ml4gw = {path = "../../toolbox/ml4gw", develop = true}
+utils = {path = "../utils", develop = true}
+numpy = "<2.0.0"
+sympy = "^1.12"
+gwpy = "^3.0.8"
+lalsuite = "^7.22"
+law = "^0.1.17"
+
+[[tool.poetry.source]]
+name = "torch"
+url = "https://download.pytorch.org/whl/cu121"
+priority = "explicit"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.3"
+jupyter = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -133,6 +133,8 @@ class DeepCleanDataset(pl.LightningDataModule):
         if split == "test":
             start += train_size
             size = int(self.hparams.test_duration * self.sample_rate)
+        elif split == "predict":
+            size = int(self.hparams.test_duration * self.sample_rate + train_size)
         else:
             size = train_size
         idx = slice(start, start + size)
@@ -241,7 +243,7 @@ class DeepCleanDataset(pl.LightningDataModule):
         stride = int(self.sample_rate / self.hparams.inference_sampling_rate)
         witnesses = InMemoryDataset(
             X,
-            kernel_size=int(self.hparams.clean_kernel_length * self.sample_rate),
+            kernel_size=self.kernel_size,
             stride=stride,
             batch_size=4 * self.hparams.batch_size,
             coincident=True,
@@ -251,8 +253,8 @@ class DeepCleanDataset(pl.LightningDataModule):
 
         strain = InMemoryDataset(
             y[None],
-            kernel_size=int(self.hparams.clean_kernel_length * self.sample_rate),
-            stride=int(self.hparams.clean_stride * self.sample_rate),
+            kernel_size=self.kernel_size,
+            stride=stride,
             batch_size=4 * self.hparams.batch_size,
             coincident=True,
             shuffle=False,
@@ -265,3 +267,8 @@ class DeepCleanDataset(pl.LightningDataModule):
 
     def test_dataloader(self):
         return self._async_loader(self.test_X, self.test_y)
+
+    def predict_dataloader(self):
+        X,y = self.load_timeseries("predict")
+        self.predict_X = self.X_scaler(X)
+        return self._async_loader(self.predict_X, y)
