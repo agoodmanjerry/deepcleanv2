@@ -1,5 +1,6 @@
 from deepclean.couplings import Coupling, SubtractionProblem
 
+
 class Sub120Hz(SubtractionProblem):
     description = "Subtraction of 120Hz main noise and side bands"
 

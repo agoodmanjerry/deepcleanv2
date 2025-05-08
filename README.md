@@ -6,13 +6,17 @@ Here's a restructure of DeepClean intended for at least a few purposes:
 - Serving as a proof of concept for use of a centralized [`toolbox`](./toolbox/) containing standard ML4GW libraries and code-styling configs
 - Generalizing many of the components of DeepClean for easier experimentation with new architectures and for target new frequency bands with the [`couplings`](./deepclean/couplings) submodule of the pipeline library
 
-I'll expand more on these when I have time, but for now I'll add a couple instructions to get started with training.
-
 ## Run instructions
 **NOTE: all commands are expected to run on LDG on GPU-enabled nodes. I particularly recommend the DGX nodes at the detector sites**
 
 ### Environment setup
-| **TODO: data authentication instructions**
+
+Setup your data authentification using your albert.einstein credentials.
+```bash
+ligo-proxy-init albert.einstein
+```
+
+| **TODO: data authentication update to SciTokens**
 
 #### Install
 Before attempting to build anything, ensure that you have the relevant submodules initialized
@@ -44,7 +48,6 @@ Set up a local directory to save container images that we'll export as `DEEPCLEA
 export DEEPCLEAN_CONTAINER_ROOT=~/images/deepclean
 mkdir -p $DEEPCLEAN_CONTAINER_ROOT
 ```
-
 Finally make a directory to save our data and run outputs
 
 ```bash
@@ -57,8 +60,8 @@ mkdir -p $RESULTS_DIR
 
 ### Configuring your cleaning problem
 DeepClean can be easily configured to remove any number of different noise couplings from the strain data, and targeted at any interferometer for which that coupling has had witness channels identified in the [`couplings`](./deepclean/couplings) submodule.
-To run a pipeline for a particular coupling, just set the environment variable `DEEPCLEAN_IFO` to the inteferometer you want to target, e.g. `export DEEPCLEAN_IFO=H1`, then edit the `problem` entry in the `deepclean` table of your [`luigi.cfg`](./luigi.cfg) to specify the comma-separated list of couplings to target.
-Right now, only the channels for the `60Hz` coupling at Hanford and Livingston (`H1` and `L1`) are defined, but this structure should make it simple to train on new couplings when their corresponding witnesses are identified.
+To run a pipeline for a particular coupling, just set the environment variable `DEEPCLEAN_IFO` to the interferometer you want to target, e.g. `export DEEPCLEAN_IFO=H1`, then edit the `problem` entry in the `deepclean` table of your [`luigi.cfg`](./luigi.cfg) to specify the comma-separated list of couplings to target.
+A coherence monitor has been added to extract relevant information to formulate the correct subtraction problems. Please see below for the interface between the coherence monitor and DeepClean as set up here.
 
 ### Dataset generation
 Start by building the data generation container
@@ -72,7 +75,7 @@ cd -
 Then you can query a stretch of time for all active segments and download the data for those segments via:
 
 ```bash
-poetry run law run deepclean.tasks.Fetch \
+LAW_CONFIG_FILE=luigi.cfg poetry run law run deepclean.tasks.Fetch \
     --data-dir $DATA_DIR \
     --start 1250899218 \
     --end 1252108818 \
@@ -82,6 +85,7 @@ poetry run law run deepclean.tasks.Fetch \
     --image data.sif \
     --job-log fetch.log
 ```
+While the above command runs locally, adding `--condor` will submit and run jobs in parallel, which can significantly speed up the data loading when several nodes are available. 
 
 ### Training
 Once you've generated your training data, you're ready to train! Start by building your training container image
@@ -92,23 +96,63 @@ apptainer build $DEEPCLEAN_CONTAINER_ROOT/train.sif apptainer.def
 cd -
 ```
 
-Find a node with some decently-sized GPUs, ensure that the one you want isn't being used, and then run (assuming you built this library with `poetry`):
+Find a node with some decent-sized GPUs, ensure that the one you want isn't being used, and then run (assuming you built this library with `poetry`):
 
 ```bash
 export GPU_INDEX=0  # or whichever you want
 export DEEPCLEAN_IFO='L1'
-poetry run law run deepclean.tasks.Train  \
-    --image train.sif \
+LAW_CONFIG_FILE=luigi.cfg poetry run law run deepclean.tasks.Train  \
+    --image $DEEPCLEAN_CONTAINER_ROOT/train.sif \
     --gpus $GPU_INDEX \
     --data-fname $DATA_DIR/deepclean-1250916945-35002.hdf5 \
     --output-dir $RESULTS_DIR/my-first-run
 ```
 
+### (Offline) Cleaning
+Once you've downloaded data and trained a suitable model, you can clean longer data stretches. Please be aware, as of the current setup, all times to be cleaned need to be fetched following the dataset generation procedure described above.
+
+For the cleaning, start by building your cleaning container image
+```bash
+cd projects/infer
+apptainer build $DEEPCLEAN_CONTAINER_ROOT/clean.sif apptainer.def
+cd -
+```
+
+Similar to the training, the cleaning should be deployed only on nodes with decent-sized GPUs. The cleaning is run via
+```bash
+export GPU_INDEX=0  # or whichever GPU is free
+export DEEPCLEAN_IFO='L1'
+LAW_CONFIG_FILE=luigi.cfg poetry run law run deepclean.tasks.Clean \
+    --image $DEEPCLEAN_CONTAINER_ROOT/clean.sif \
+    --gpus $GPU_INDEX \
+    --input-dir $DATA_DIR \
+    --output-dir $RESULTS_DIR/clean \
+    --train-dir $RESULTS_DIR/my-first-run/lightning_logs/version_0/
+```
+While the above command runs locally, adding `--condor` will submit jobs in parallel for all individual files within the input directory. This will significantly speed up the cleaning when several nodes are available. 
+
 #### Making changes to the code
 If you make changes to the code that you want to experiment with, you can map them into the container at run time without having to rebuild simply by passing the `--dev` flag to any of the `law run` commands.
 
 ## Where things stand
-Since this code is in my local repo, someone should set up an ML4GW/deepcleanv2 repo and push this code there so that it can be managed by remaining researchers.
+
+#### CDC pipeline
+Even though the code, as is, provides functionality to download, train, and clean with DeepClean, several aspects are missing, particularly when considering multiple cleaning problems. They need or are going to be addressed soon:
+
+- training parallelization for different subtraction problems
+- parallelization for the offline cleaning (using various GPUs)
+- run cleaning starting directly from frame files to avoid intermediate step saving hdf5 files
+
+Despite that, for easier use, we can avoid building a separate image for each task and unify it into one common deepclean image, as in the [amplfi repo](https://github.com/ML4GW/amplfi).
+
+#### Full pipeline
+A single run of the train project can take care of training and cleaning data offline.
+To simulate the production retraining pipeline, it should be straightforward to set up a Luigi `Task` that
+1. Downloads segments from a particular stretch
+2. Iteratively fine-tunes a model on segments during that stretch at some fixed cadence by leveraging the `--data.start_offset` and `--data.duration` flags. Unfortunately, I don't have support for loading pre-trained weights yet, but that should be more or less trivial.
+3. Potentially performs a hyperparameter search on the first training to figure out good baseline training parameters that can be used for the remaining training (with a significantly reduced learning rate to fine-tune).
+
+This should be the default pipeline to run to evaluate the efficacy of any new ideas, which can be compared directly via the W&B dashboard.
 
 ### Offline training/cleaning
 First of all, lots of good work on scaling up training is being done in the [aframev2 repo](https://github.com/ml4gw/aframev2). This includes
@@ -127,15 +171,6 @@ On the other hand, there's some good stuff here that would be valuable to aframe
 There should probably start being a unified library layer that consolidates a lot of this functionality into one place.
 Moreover, these two projects should be coordinating a lot to see how they're solving their infra problems.
 At the infra level they're much more similar than they are different, and there's lots of work that would benefit both.
-
-#### Full pipeline
-A single run of the train project can take care of training and cleaning data offline.
-To simulate the production retraining pipeline, it should be straightforward to set up a Luigi `Task` that
-1. Downloads segments from a particular stretch
-2. Iteratively fine-tunes a model on segments during that stretch at some fixed cadence by leveraging the `--data.start_offset` and `--data.duration` flags. Unfortunately, I don't have support for loading pre-trained weights yet, but that should be more or less trivial.
-3. Potentially performs a hyperparameter search on the first training to figure out good baseline training parameters that can be used for the remaining training (with a significantly reduced learning rate to fine-tune).
-
-This should be the default pipeline to run to evaluate the efficacy of any new ideas, which can be compared directly via the W&B dashboard.
 
 ### Online pipeline
 The [microservice project](https://github.com/alecgunny/deepclean/tree/ml4gw-introduction/projects/microservice) used to implement IaaS inference needs to be deprecated for a few reasons.
