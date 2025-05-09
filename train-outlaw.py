@@ -10,10 +10,10 @@ from deepclean.couplings import subtraction_problems
 # Environment variables
 HOME = "/home/chiajui.chou"
 DEEPCLEAN_CONTAINER_ROOT = f"{HOME}/images/deepclean"
-DATA_DIR = f"{HOME}/deepclean/data/CDC_test-120Hz"
+DATA_DIR = f"{HOME}/deepclean/data/CDC_test-180Hz"
 RESULTS_DIR = f"{HOME}/deepclean/results"
 DEEPCLEAN_IFO = "H1"
-DEEPCLEAN_PROBLEM = "120Hz"
+DEEPCLEAN_PROBLEM = "180Hz"
 GPU_INDEX = 0
 # Original deepclean.tasks.Train
 # luigi.cfg
@@ -41,7 +41,7 @@ image = "train.sif"
 gpus = GPU_INDEX
 data_fname = f"{DATA_DIR}/deepclean-1378402219-3072.hdf5"
 train_config = f"{HOME}/deepcleanv2/projects/train/config.yaml"
-output_dir = f"{RESULTS_DIR}/O4-CDC_120Hz_outlaw"
+output_dir = f"{RESULTS_DIR}/O4-CDC_180Hz_dcprod-arch"
 config = train_config
 channels = [strain_channel] + witnesses
 freq_low = freq_low
