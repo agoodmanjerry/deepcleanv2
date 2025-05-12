@@ -185,38 +185,39 @@ class OfflinePsdRatio(Metric):
     def clean(self):
         # first build our overlapping predictions
         # into a single timeseries of noise predictions
-        prediction = self.predictions.view(-1)
+        prediction = torch.cat(self.predictions, dim=0)
         N = prediction.shape[0]
         device = self.predictions[0].device
         dtype = self.predictions[0].dtype
 
         nsamp = int((N - 1) * self.clean_stride + self.clean_kernel_size)
         y_pred = torch.zeros(
-            nsamp, device=device, dtype=dtype
+            nsamp, device="cpu", dtype=dtype
         )
 
         # Get hann window function
         window_fn = signal.get_window(
-            self.window,
-            int(self.clean_kernel_size * self.clean_stride / self.clean_kernel_size),
-        )
+            self.window, int(self.clean_kernel_size)
+        )  * (self.clean_stride / self.clean_kernel_size)
 
         # Concatenate timeseries
         for i in range(N):
             idx = slice(i*self.clean_stride, i*self.clean_stride + self.clean_kernel_size)
-            y_pred[idx] += prediction[i] * window_fn
+            y_pred[idx] += prediction[i].double().cpu().detach().numpy() * window_fn
 
         # postprocess, doing the bandpass filtering back
-        noise = torch.Tensor(y_pred, device="cpu").double()
+        noise = y_pred.double().to(device)
         noise = self.y_scaler(noise, reverse=True)
-        noise = self.bandpass(noise.detach().numpy())
+        noise = self.bandpass(noise.cpu().double().detach().numpy())
         noise = torch.tensor(noise, device=device)
+        noise.view(1, -1)
+        noise = noise[None]
 
         # reshape our raw strain into a timeseries
         num_frames = int(len(y_pred) // self.clean_kernel_size)
         raw = torch.cat(self.strain, dim=0)[:num_frames]
-        raw = raw.view(1, -1)
-        return noise, raw.double()
+        raw = raw.view(1, -1).to(device)
+        return noise.double(), raw.double()
 
     def compute(self, reduce: bool = True):
         noise, raw = self.clean()

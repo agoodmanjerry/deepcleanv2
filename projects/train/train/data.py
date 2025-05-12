@@ -120,6 +120,14 @@ class DeepCleanDataset(pl.LightningDataModule):
     def kernel_size(self):
         return int(self.hparams.kernel_length * self.sample_rate)
 
+    @property
+    def clean_kernel_length(self):
+        return self.hparams.clean_kernel_length
+
+    @property
+    def clean_stride(self):
+        return self.hparams.clean_stride
+
     def on_after_batch_transfer(self, batch, _):
         if self.trainer.training:
             y = batch[:, 0]
