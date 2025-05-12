@@ -4,6 +4,7 @@ from typing import Optional
 import torch
 from ml4gw.transforms import SpectralDensity
 from torchmetrics import Metric
+from scipy import signal
 
 
 class PsdRatio(torch.nn.Module):
@@ -143,6 +144,77 @@ class OnlinePsdRatio(Metric):
 
         # reshape our raw strain into a timeseries
         raw = torch.cat(self.strain, dim=0)[1 : num_frames - 1]
+        raw = raw.view(1, -1)
+        return noise, raw.double()
+
+    def compute(self, reduce: bool = True):
+        noise, raw = self.clean()
+        if reduce:
+            return self.loss_fn(noise, raw).mean()
+        return noise, raw
+
+class OfflinePsdRatio(Metric):
+    def __init__(
+        self,
+        sample_rate: float,
+        clean_kernel_length: float,
+        clean_stride: float,
+        window: str,
+        bandpass: Callable,
+        y_scaler: torch.nn.Module,
+    ) -> None:
+        super().__init__()
+        self.sample_rate = sample_rate
+        self.clean_kernel_size = int(clean_kernel_length * self.sample_rate)
+        self.clean_stride = int(clean_stride * self.sample_rate)
+        self.offset = self.clean_kernel_size - self.clean_stride
+        self.window = window
+
+        self.loss_fn = None
+        self.bandpass = bandpass
+        self.y_scaler = y_scaler
+
+        self.add_state("predictions", default=[])
+        self.add_state("strain", default=[])
+
+    def update(self, y, kind):
+        if self.loss_fn is None:
+            raise ValueError("Must provide loss_fn before calling update")
+        getattr(self, kind).append(y)
+
+    def clean(self):
+        # first build our overlapping predictions
+        # into a single timeseries of noise predictions
+        prediction = self.predictions.view(-1)
+        N = prediction.shape[0]
+        device = self.predictions[0].device
+        dtype = self.predictions[0].dtype
+
+        nsamp = int((N - 1) * self.clean_stride + self.clean_kernel_size)
+        y_pred = torch.zeros(
+            nsamp, device=device, dtype=dtype
+        )
+
+        # Get hann window function
+        window_fn = signal.get_window(
+            self.window,
+            int(self.clean_kernel_size * self.clean_stride / self.clean_kernel_size),
+        )
+
+        # Concatenate timeseries
+        for i in range(N):
+            idx = slice(i*self.clean_stride, i*self.clean_stride + self.clean_kernel_size)
+            y_pred[idx] += prediction[i] * window_fn
+
+        # postprocess, doing the bandpass filtering back
+        noise = torch.Tensor(y_pred, device="cpu").double()
+        noise = self.y_scaler(noise, reverse=True)
+        noise = self.bandpass(noise.detach().numpy())
+        noise = torch.tensor(noise, device=device)
+
+        # reshape our raw strain into a timeseries
+        num_frames = int(len(y_pred) // self.clean_kernel_size)
+        raw = torch.cat(self.strain, dim=0)[:num_frames]
         raw = raw.view(1, -1)
         return noise, raw.double()
 

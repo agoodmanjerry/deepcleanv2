@@ -135,5 +135,5 @@ class DeepCleanTask(law.SandboxTask):
     def run(self):
         stream_command(self.command)
 
-    def singularity_forward_law(self) -> bool:
-        return False
+    # def singularity_forward_law(self) -> bool:
+    #     return False

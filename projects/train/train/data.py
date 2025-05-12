@@ -240,11 +240,14 @@ class DeepCleanDataset(pl.LightningDataModule):
         do cleaning (1s frames).
         """
 
-        stride = int(self.sample_rate / self.hparams.inference_sampling_rate)
+        if self.hparams.clean_kernel_length is not None and self.hparams.clean_stride is not None:
+            inference_stride = int(self.hparams.clean_stride * self.sample_rate)
+        else:
+            inference_stride = int(self.sample_rate / self.hparams.inference_sampling_rate)
         witnesses = InMemoryDataset(
             X,
-            kernel_size=self.kernel_size,
-            stride=stride,
+            kernel_size=int(self.hparams.clean_kernel_length * self.sample_rate),
+            stride=inference_stride,
             batch_size=4 * self.hparams.batch_size,
             coincident=True,
             shuffle=False,
@@ -253,8 +256,8 @@ class DeepCleanDataset(pl.LightningDataModule):
 
         strain = InMemoryDataset(
             y[None],
-            kernel_size=self.kernel_size,
-            stride=stride,
+            kernel_size=int(self.hparams.clean_kernel_length * self.sample_rate),
+            stride=int(self.hparams.clean_kernel_length * self.sample_rate),
             batch_size=4 * self.hparams.batch_size,
             coincident=True,
             shuffle=False,
