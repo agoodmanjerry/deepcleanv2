@@ -26,7 +26,7 @@ data:
   train_duration: 1024
   test_duration: 2048
   train_stride: 0.25
-  valid_frac: 0.33
+  valid_frac: 0.1
   inference_sampling_rate: 2
   start_offset: 0
   clean_kernel_length: 8
@@ -39,9 +39,12 @@ data:
   # freq_low: []
   # freq_high: []
 optimizer:
-  lr: 0.2
+  lr: 1e-2
+  weight_decay: 1e-5
 lr_scheduler:
-  pct_start: 0.33
+  # pct_start: 0.33
+  step_size: 10
+  gamma: 0.1
 # lr_scheduler:
 #   monitor: "train_loss"
 #   factor: 0.02 
@@ -62,7 +65,7 @@ trainer:
   # now because our convolutions aren't really large enough
   # precision: 16-mixed
   accelerator: auto
-  max_epochs: 200
+  max_epochs: 100
   check_val_every_n_epoch: 1
   log_every_n_steps: 20
   benchmark: true

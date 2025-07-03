@@ -22,8 +22,8 @@ class PsdRatio(torch.nn.Module):
             sample_rate,
             fftlength,
             overlap=overlap,
-            average="median",
-            fast=True,
+            average="mean",
+            fast=False,
         )
         self.asd = asd
         self.sample_rate = sample_rate
@@ -214,9 +214,9 @@ class OfflinePsdRatio(Metric):
         noise = noise[None]
 
         # reshape our raw strain into a timeseries
-        num_frames = int(len(y_pred) // self.clean_kernel_size)
-        raw = torch.cat(self.strain, dim=0)[:num_frames]
+        raw = torch.cat(self.strain, dim=0)
         raw = raw.view(1, -1).to(device)
+        raw = raw[:, :nsamp]
         return noise.double(), raw.double()
 
     def compute(self, reduce: bool = True):
