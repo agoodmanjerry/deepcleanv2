@@ -21,11 +21,11 @@ ml4gw = "^0.7"
 
 # local dependencies
 utils = {path = "../utils", develop = true}
-train = {path = "../train", develop = true}
 numpy = "<2.0.0"
 sympy = "^1.12"
 gwpy = "^3.0.8"
 lalsuite = "^7.22"
+#law = "^0.1.17"
 
 [[tool.poetry.source]]
 name = "torch"

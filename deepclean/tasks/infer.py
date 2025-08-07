@@ -14,9 +14,9 @@ class Clean(DeepCleanTask, law.LocalWorkflow, StaticMemoryWorkflow):
     output_dir = luigi.Parameter()
     train_dir = luigi.Parameter()
 
-    @property
-    def python(self):
-        return "/opt/env/bin/python"
+    # @property
+    # def python(self):
+    #     return "/opt/env/bin/python"
 
     @law.dynamic_workflow_condition
     def workflow_condition(self) -> bool:
@@ -25,7 +25,7 @@ class Clean(DeepCleanTask, law.LocalWorkflow, StaticMemoryWorkflow):
     @workflow_condition.create_branch_map
     def create_branch_map(self):
         filenames = [f for f in os.listdir(self.input_dir) if '.hdf5' in f]
-        files = [self.input_dir+f for f in filenames]
+        files = [self.input_dir+'/'+f for f in filenames]
         branch_map = dict(enumerate(files))
         return branch_map
 
