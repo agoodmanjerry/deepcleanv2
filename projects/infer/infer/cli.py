@@ -13,27 +13,43 @@ import glob
 import re
 from gwpy.timeseries import TimeSeriesDict, TimeSeries
 
+# def get_best_checkpoint_path(checkpoint_dir):
+#     checkpoint_files = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
+#     if not checkpoint_files:
+#         return None
+
+#     best_checkpoint_file = None
+#     best_metric_value = float('inf') # Initialize with a large value for loss, or -inf for accuracy
+
+#     for checkpoint_file in checkpoint_files:
+#         match = re.search(r"epoch=(\d+)-val_loss=([\d\.]+)", checkpoint_file) # Adjust regex based on your filename format
+#         if match:
+#             epoch = int(match.group(1))
+#             metric_value = float(match.group(2))
+
+#             if metric_value < best_metric_value: # Use > for accuracy
+#                 best_metric_value = metric_value
+#                 best_checkpoint_file = checkpoint_file
+#         else:
+#              #print(f"Warning: Could not extract metric from checkpoint file: {checkpoint_file}")
+#              if best_checkpoint_file is None:
+#                 best_checkpoint_file = checkpoint_file # If no metric is found, take the first file as a fallback
+
+#     return best_checkpoint_file
+
 def get_best_checkpoint_path(checkpoint_dir):
-    checkpoint_files = glob.glob(os.path.join(checkpoint_dir, "*.ckpt"))
+    checkpoint_files = glob.glob(os.path.join(checkpoint_dir, "*-*.ckpt"))
     if not checkpoint_files:
         return None
 
     best_checkpoint_file = None
-    best_metric_value = float('inf') # Initialize with a large value for loss, or -inf for accuracy
+    epochs = torch.tensor([int(ckpt_file.strip().split("/")[-1].split("-")[0]) for ckpt_file in checkpoint_files])
+    max_epoch = int(epochs.max())
 
     for checkpoint_file in checkpoint_files:
-        match = re.search(r"epoch=(\d+)-val_loss=([\d\.]+)", checkpoint_file) # Adjust regex based on your filename format
+        match = re.search(f"/{max_epoch}-", checkpoint_file) # Adjust regex based on your filename format
         if match:
-            epoch = int(match.group(1))
-            metric_value = float(match.group(2))
-
-            if metric_value < best_metric_value: # Use > for accuracy
-                best_metric_value = metric_value
-                best_checkpoint_file = checkpoint_file
-        else:
-             #print(f"Warning: Could not extract metric from checkpoint file: {checkpoint_file}")
-             if best_checkpoint_file is None:
-                best_checkpoint_file = checkpoint_file # If no metric is found, take the first file as a fallback
+            best_checkpoint_file = checkpoint_file
 
     return best_checkpoint_file
 
