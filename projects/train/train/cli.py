@@ -15,8 +15,9 @@ class AframeCLI(LightningCLI):
         parser.add_argument("--output-dir", type=str, default=None)
 
         parser.add_optimizer_args(torch.optim.Adam)
-        parser.add_lr_scheduler_args(torch.optim.lr_scheduler.OneCycleLR)
+        # parser.add_lr_scheduler_args(torch.optim.lr_scheduler.OneCycleLR)
         # parser.add_lr_scheduler_args(ReduceLROnPlateau)
+        parser.add_lr_scheduler_args(torch.optim.lr_scheduler.StepLR)
 
         parser.link_arguments(
             "data.num_witnesses",
@@ -72,13 +73,13 @@ class AframeCLI(LightningCLI):
         )
 
         # link optimizer and scheduler args
-        parser.link_arguments(
-            "data.steps_per_epoch",
-            "lr_scheduler.steps_per_epoch",
-            apply_on="instantiate",
-        )
-        parser.link_arguments("optimizer.lr", "lr_scheduler.max_lr")
-        parser.link_arguments("trainer.max_epochs", "lr_scheduler.epochs")
+        # parser.link_arguments(
+        #     "data.steps_per_epoch",
+        #     "lr_scheduler.steps_per_epoch",
+        #     apply_on="instantiate",
+        # )
+        # parser.link_arguments("optimizer.lr", "lr_scheduler.max_lr")
+        # parser.link_arguments("trainer.max_epochs", "lr_scheduler.epochs")
 
 
 def main(args=None):

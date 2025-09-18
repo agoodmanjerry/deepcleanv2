@@ -2,7 +2,7 @@
 export DEEPCLEAN_CONTAINER_ROOT=~/images/deepclean
 mkdir -p $DEEPCLEAN_CONTAINER_ROOT
 
-export DATA_DIR=~/deepclean/data/CDC_test-120Hz
+export DATA_DIR=~/deepclean/data/CDC_test120Hz
 mkdir -p $DATA_DIR
 
 export RESULTS_DIR=~/deepclean/results

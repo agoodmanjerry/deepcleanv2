@@ -204,10 +204,10 @@ class DeepCleanDataset(pl.LightningDataModule):
         # to our loss function. We have to do the
         # bandpass filtering back in numpy because
         # I can't get torchaudio to work properly
-        self.y_scaler.fit(train_y)
-        train_y = self.y_scaler(train_y)
         train_y = self.bandpass(train_y.numpy())
-        self.train_y = torch.Tensor(train_y)
+        train_y = torch.Tensor(train_y)
+        self.y_scaler.fit(train_y)
+        self.train_y = self.y_scaler(train_y)
 
         # we don't need to do any preprocessing on the
         # validation target timeseries since we're
@@ -249,12 +249,13 @@ class DeepCleanDataset(pl.LightningDataModule):
         """
 
         if self.hparams.clean_kernel_length is not None and self.hparams.clean_stride is not None:
-            inference_stride = int(self.hparams.clean_stride * self.sample_rate)
+            clean_kernel_size = int(self.clean_kernel_length * self.sample_rate)
+            inference_stride = int(self.clean_stride * self.sample_rate)
         else:
             inference_stride = int(self.sample_rate / self.hparams.inference_sampling_rate)
         witnesses = InMemoryDataset(
             X,
-            kernel_size=int(self.hparams.clean_kernel_length * self.sample_rate),
+            kernel_size=clean_kernel_size,
             stride=inference_stride,
             batch_size=4 * self.hparams.batch_size,
             coincident=True,
@@ -264,8 +265,8 @@ class DeepCleanDataset(pl.LightningDataModule):
 
         strain = InMemoryDataset(
             y[None],
-            kernel_size=int(self.hparams.clean_kernel_length * self.sample_rate),
-            stride=int(self.hparams.clean_kernel_length * self.sample_rate),
+            kernel_size=int(self.sample_rate),
+            stride=int(self.sample_rate),
             batch_size=4 * self.hparams.batch_size,
             coincident=True,
             shuffle=False,

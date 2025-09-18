@@ -52,7 +52,7 @@ class Autoencoder(Architecture):
         self,
         num_witnesses: int,
         hidden_channels: list[int],
-        activation: nn.Module = nn.ReLU(),
+        activation: nn.Module = nn.Tanh(),
     ) -> None:
         super().__init__()
 
@@ -83,7 +83,7 @@ class Autoencoder(Architecture):
             in_channels = out_channels
 
         self.upsampler = nn.Sequential()
-        out_layers = hidden_channels[-2:None:-1] + [1]
+        out_layers = hidden_channels[-2:None:-1] + [num_witnesses]
         for i, out_channels in enumerate(out_layers):
             conv_block = ConvBlock(
                 in_channels,
