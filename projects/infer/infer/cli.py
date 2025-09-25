@@ -74,7 +74,7 @@ def main(args=None):
 
     # recover model from checkpoint
     path = cli.trainer.logger.save_dir
-    best_ckpt = get_best_checkpoint_path(path+"checkpoints")
+    best_ckpt = get_best_checkpoint_path(path+"/"+"checkpoints")
     weights = torch.load(best_ckpt)
     cli.model.load_state_dict(weights["state_dict"])
     # initilize scaler
@@ -101,6 +101,8 @@ def main(args=None):
     ts_dict[strain + "_DC"] = TimeSeries(data=clean, t0=start, sample_rate=cli.model.metric.sample_rate,
                 channel=strain+"_DC", unit='seconds')
 
+    if os.path.exists(cli.config["output_dir"]) is False:
+        os.makedirs(cli.config["output_dir"])
     fname = "{}-{}-{}.gwf".format(
             prefix, int(start), int(duration)
         )
